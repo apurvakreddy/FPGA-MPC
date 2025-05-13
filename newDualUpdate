@@ -1,0 +1,91 @@
+Dual_update.sv
+
+`timescale 1ns/1ps
+
+module dual_update #(
+    parameter int STATE_DIM   = 6,
+    parameter int CONTROL_DIM = 12,
+    parameter int W           = 16
+) (
+    input  logic                         clk,
+    input  logic                         reset,
+    input  logic                         start,
+
+    // state‐dual inputs
+    input  logic signed [W-1:0]          u_k_0, u_k_1, u_k_2, u_k_3, u_k_4, u_k_5,
+    input  logic signed [W-1:0]          z_k_0, z_k_1, z_k_2, z_k_3, z_k_4, z_k_5,
+    input  logic signed [W-1:0]          y_k_0, y_k_1, y_k_2, y_k_3, y_k_4, y_k_5,
+
+    // control‐dual inputs
+    input  logic signed [W-1:0]          x_k_0, x_k_1, x_k_2, x_k_3, x_k_4, x_k_5,
+    input  logic signed [W-1:0]          v_k_0, v_k_1, v_k_2, v_k_3, v_k_4, v_k_5,
+    input  logic signed [W-1:0]          g_k_0, g_k_1, g_k_2, g_k_3, g_k_4, g_k_5,
+
+    // updated dual outputs
+    output logic signed [W-1:0]          y_out_0, y_out_1, y_out_2, y_out_3, y_out_4, y_out_5,  
+    output logic signed [W-1:0]          g_out_0, g_out_1, g_out_2, g_out_3, g_out_4, g_out_5,
+    output logic                         done
+);
+
+  // next‐value comb logic
+  logic signed [W-1:0] y_calc_0, y_calc_1, y_calc_2, y_calc_3, y_calc_4, y_calc_5;
+  logic signed [W-1:0] g_calc_0, g_calc_1, g_calc_2, g_calc_3, g_calc_4, g_calc_5;
+
+  generate
+    genvar i;
+    for (i = 0; i < STATE_DIM; i++) begin : STATE_DUAL
+      assign y_calc_0 = y_k_0 + (u_k_0 - z_k_0);
+      assign y_calc_1 = y_k_1 + (u_k_1 - z_k_1);
+      assign y_calc_2 = y_k_2 + (u_k_2 - z_k_2);
+      assign y_calc_3 = y_k_3 + (u_k_3 - z_k_3);
+      assign y_calc_4 = y_k_4 + (u_k_4 - z_k_4);
+      assign y_calc_5 = y_k_5 + (u_k_5 - z_k_5);
+    end
+    for (i = 0; i < CONTROL_DIM; i++) begin : CTRL_DUAL
+      assign g_calc_0 = g_k_0 + (x_k_0 - v_k_0);
+      assign g_calc_1 = g_k_1 + (x_k_1 - v_k_1);
+      assign g_calc_2 = g_k_2 + (x_k_2 - v_k_2);
+      assign g_calc_3 = g_k_3 + (x_k_3 - v_k_3);
+      assign g_calc_4 = g_k_4 + (x_k_4 - v_k_4);
+      assign g_calc_5 = g_k_5 + (x_k_5 - v_k_5);
+    end
+  endgenerate
+
+  // register stage
+  always_ff @(posedge clk or posedge reset) begin
+    if (reset) begin
+      y_out_0 <= '{default:'0};
+      g_out_0 <= '{default:'0};
+      y_out_1 <= '{default:'0};
+      g_out_1 <= '{default:'0};
+      y_out_2 <= '{default:'0};
+      g_out_2 <= '{default:'0};
+      y_out_3 <= '{default:'0};
+      g_out_3 <= '{default:'0};
+      y_out_4 <= '{default:'0};
+      g_out_4 <= '{default:'0};
+      y_out_5 <= '{default:'0};
+      g_out_5 <= '{default:'0};
+      done  <= 1'b0;
+    end
+    else if (start) begin
+      y_out_0 <= y_calc_0;
+      g_out_0 <= g_calc_0;
+      y_out_1 <= y_calc_1;
+      g_out_1 <= g_calc_1;
+      y_out_2 <= y_calc_2;
+      g_out_2 <= g_calc_2;
+      y_out_3 <= y_calc_3;
+      g_out_3 <= g_calc_3;
+      y_out_4 <= y_calc_4;
+      g_out_4 <= g_calc_4;
+      y_out_5 <= y_calc_5;
+      g_out_5 <= g_calc_5;
+      done  <= 1'b1;
+    end
+    else begin
+      done <= 1'b0;
+    end
+  end
+
+endmodule
