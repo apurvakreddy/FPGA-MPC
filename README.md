@@ -15,7 +15,7 @@ resource-constrained platforms. In this work we aim to accelerate TinyMPC’s al
 on an FPGA, unlocking better performance and capabilities for future MPC research.
 
 
-## 2) System Design
+## System Design
 <img width="2296" height="1186" alt="image" src="https://github.com/user-attachments/assets/8c12a9fc-0ca2-4530-aa8a-c5560c7537e1" />
 Figure 1: Dataflow Diagram of FPGA-MPC
 
