@@ -17,7 +17,7 @@ on an FPGA, unlocking better performance and capabilities for future MPC researc
 
 ## System Design
 <img width="2296" height="1186" alt="image" src="https://github.com/user-attachments/assets/8c12a9fc-0ca2-4530-aa8a-c5560c7537e1" />
-Figure 1: Dataflow Diagram of FPGA-MPC
+
 
 The quadrotor knows its current position but relies on external instructions on where to go next. It
 sends its current position and orientation data as a 16-bit struct via ethernet to an external CPU.
